@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <a href="#" class="header_link">
+            <img src="mospolytech-logo-white.svg" alt="logo" class="header_link_image">
+        </a>
+    </header>
+    <main>
+        <h1 class="calculator_title">Калькулятор</h1>
+            <div class="calculator">
+                <input type="text" class="calculator_display" id="display" readonly>
+                <div class="box_calculator_button">
+                    <div class="mini_box">
+                        <button type="button" class="calculator_button" onclick="appendToDisplay('0')" value="0">0</button>
+                        <button type="button" class="calculator_button" onclick="appendToDisplay('1')" value="1">1</button>
+                        <button type="button" class="calculator_button" onclick="appendToDisplay('2')" value="2">2</button>
+                        <button type="button" class="calculator_button" onclick="appendToDisplay('+')" value="+">+</button>
+                    </div>
+                    <div class="mini_box">
+                        <button type="button" class="calculator_button" onclick="appendToDisplay('3')" value="3">3</button>
+                        <button type="button" class="calculator_button" onclick="appendToDisplay('4')" value="4">4</button>
+                        <button type="button" class="calculator_button" onclick="appendToDisplay('5')" value="5">5</button>
+                        <button type="button" class="calculator_button" onclick="appendToDisplay('-')" value="-">-</button>
+                    </div>
+                    <div class="mini_box">
+                        <button type="button" class="calculator_button" onclick="appendToDisplay('6')" value="6">6</button>
+                        <button type="button" class="calculator_button" onclick="appendToDisplay('7')" value="7">7</button>
+                        <button type="button" class="calculator_button" onclick="appendToDisplay('8')" value="8">8</button>
+                        <button type="button" class="calculator_button" onclick="appendToDisplay('*')" value="*">×</button>
+                    </div>
+                    <div class="mini_box">
+                        <button type="button" class="calculator_button" onclick="appendToDisplay('9')" value="9">9</button>
+                        <button type="button" class="calculator_button" onclick="appendToDisplay('(')" value="(">(</button>
+                        <button type="button" class="calculator_button" onclick="appendToDisplay(')')"value=")">)</button>
+                        <button type="button" class="calculator_button" onclick="appendToDisplay('/')" value="/">/</button>
+                    </div>
+                    <div class="mini_box">
+                        <button type="button" onClick="clearDisplay()" class="calculator_button_clear" id="clear" type = "reset">C</button>
+                        <button type="button" onclick="appendToDisplay()" class="calculator_button_equals" id="calculate">=</button>
+                    </div>
+                </div>
+            </div>
+    </main>
+    <footer>
+        <p class="footer_text">Реброва Анастасия. Группа 241-3210.</p>
+    </footer>
+    <script>
+        function appendToDisplay(value) {
+            document.getElementById('display').value += value;
+        }
+
+        function clearDisplay() {
+            document.getElementById('display').value = '';
+        }
+
+        function calculate() {
+        const expression = document.getElementById('display').value;
+        fetch('calculate.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'val=' + encodeURIComponent(expression) 
+        })
+        .then(response => response.text())
+        .then(result => {
+            document.getElementById('display').value = result;
+        })
+        .catch(error => console.error('Ошибка:', error));
+        }
+        function clearDisplay() {
+            document.getElementById('display').value = '';
+        }
+    </script>
+</body>
+</html>
