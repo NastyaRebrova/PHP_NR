@@ -20,11 +20,5 @@ class MainController{
     public function sayBye(string $name){
         $this->view->renderHtml2('main/bye.php', ['name'=>$name, 'title'=>'Страница прощания']);
     }
-
-    public function main(){
-        $sql = 'SELECT * FROM `articles`';
-        $articles = $this->db->query($sql);
-        // var_dump($articles);
-        $this->view->renderHtml('main/main', ['articles'=>$articles]);
-    }
+    
 }

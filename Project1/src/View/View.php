@@ -10,13 +10,13 @@ class View{
         $this->templatesPath = $templatesPath;
     }
 
-    public function renderHtml(string $templateName, $vars=[])
+    public function renderHtml(string $templateName, $vars=[], $code=200)
     {
         // если заголовок не передан, устанавливаем его по умолчанию
         if (!isset($vars['title'])) {
             $vars['title'] = 'Мой блог';
         }
-        
+        http_response_code($code);
         extract($vars);
         include $this->templatesPath.'/'.$templateName.'.php';
     }

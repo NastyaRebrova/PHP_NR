@@ -2,7 +2,7 @@
 
     return [
         "~article/(\d+)~" => [src\Controllers\ArticleController::class, 'show'],
-        "~^$~" => [src\Controllers\MainController::class, 'main'],
+        "~^$~" => [src\Controllers\ArticleController::class, 'index'],
         "~^hello/(.*)$~" =>[src\Controllers\MainController::class, 'sayHello'],
         "~^bye/(.*)$~" =>[src\Controllers\MainController::class, 'sayBye'],
     ];
