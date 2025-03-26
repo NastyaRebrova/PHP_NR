@@ -10,19 +10,19 @@
             $dbOptions = require('settings.php');
 
             $this->pdo = new \PDO(
-                'mysql:host=' . $dbOptions['host'] . ';dbname=' . $dbOptions['dbname'],
+                'mysql:host='.$dbOptions['host'].';dbname='.$dbOptions['dbname'],
                 $dbOptions['user'],
-                $dbOptions['password']
+                $dbOptions['password'],
             );
         }
 
-        public function query($sql, $params = [], string $className='stdClass') :?array
+        public function query($sql, $params = []) :?array
         {
             $sth = $this->pdo->prepare($sql);
             $result = $sth->execute($params);
             if ($result == false){
                 return null;
             }
-            return $sth->fetchAll(\PDO::FETCH_CLASS, $className);
+            return $sth->fetchAll();
         }
     }

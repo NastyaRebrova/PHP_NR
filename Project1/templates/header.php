@@ -18,7 +18,10 @@
           <a class="nav-link active" aria-current="page" href="<?=$_SERVER['SCRIPT_NAME'];?>">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="<?=dirname($_SERVER['SCRIPT_NAME']);?>/hello/olga">Hello</a>
+          <a class="nav-link" href="<?=dirname($_SERVER['SCRIPT_NAME']);?>/hello/Nastya">Hello</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="<?=dirname($_SERVER['SCRIPT_NAME']);?>/bye/Oleg">Bye</a>
         </li>
       </ul>
     </div>

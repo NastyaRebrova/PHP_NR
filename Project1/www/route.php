@@ -2,9 +2,9 @@
 
     return [
         "~article/(\d+)~" => [src\Controllers\ArticleController::class, 'show'],
-        "~^$~" => [src\Controllers\ArticleController::class, 'index'],
+        "~^$~" => [src\Controllers\MainController::class, 'main'],
         "~^hello/(.*)$~" =>[src\Controllers\MainController::class, 'sayHello'],
-        "~bye/(.*)~" => [src\Controllers\MainController::class, 'sayBye'],
+        "~^bye/(.*)$~" =>[src\Controllers\MainController::class, 'sayBye'],
     ];
 
 
