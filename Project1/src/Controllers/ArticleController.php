@@ -1,6 +1,7 @@
 <?php
 
 namespace src\Controllers;
+
 use src\View\View;
 use src\Services\Db;
 use src\Models\Articles\Article;
@@ -39,5 +40,49 @@ class ArticleController {
         
         $this->view->renderHtml('article/show', ['article' => $article[0],'author' => $author[0]
         ]);
+    }
+
+    public function edit(int $id)
+    {
+        // получение статьи для редактирования
+        $sql = "SELECT * FROM `articles` WHERE `id`=:id";
+        $article = $this->db->query($sql, [':id' => $id], Article::class);
+
+        if ($article === null || empty($article)) {
+            $this->view->renderHtml('main/error', [], 404);
+            return;
+        }
+
+        $this->view->renderHtml('article/edit', ['article' => $article[0]]);
+    }
+
+    public function update(int $id)
+    {
+        // проверка, что запрос POST
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . dirname($_SERVER['SCRIPT_NAME']) . '/article/'. $id . '/edit');
+            exit();
+        }
+
+        try {
+            $sql = "UPDATE `articles` SET `name`=:name, `text`=:text WHERE `id`=:id";
+            $this->db->query($sql, [
+                ':name' => $_POST['name'],
+                ':text' => $_POST['text'],
+                ':id' => $id
+            ]);
+
+            // перенаправление на страницу статьи
+            header('Location: ' . dirname($_SERVER['SCRIPT_NAME']) . '/article/'. $id);
+            exit();
+        } catch (\Exception $e) {
+            $article = new Article($_POST['name'], $_POST['text']);
+            $article->id = $id;
+
+            $this->view->renderHtml('article/edit', [
+                'article' => $article,
+                'error' => 'Ошибка при обновлении статьи: '. $e->getMessage()
+            ]);
+        }
     }
 }
