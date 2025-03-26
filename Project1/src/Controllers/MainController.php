@@ -14,11 +14,11 @@ class MainController{
     }
     
     public function sayHello(string $name){
-        $this->view->renderHtml('main/hello', ['name'=>$name]);
+        $this->view->renderHtml('main/hello', ['name'=>$name, 'title'=>'Страница приветствия']);
     }
 
     public function sayBye(string $name){
-        $this->view->renderHtml2('main/bye.php', ['name'=>$name]);
+        $this->view->renderHtml2('main/bye.php', ['name'=>$name, 'title'=>'Страница прощания']);
     }
 
     public function main(){

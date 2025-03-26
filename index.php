@@ -8,4 +8,4 @@
     var_dump(file_exists('../text.txt'));
     var_dump(file_exists('try.txt'));
 
-    $arr = [1,2,3,4,5]
+    $arr = [1,2,3,4,5];
