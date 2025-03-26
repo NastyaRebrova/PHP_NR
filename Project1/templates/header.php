@@ -21,7 +21,7 @@
           <a class="nav-link" href="<?=dirname($_SERVER['SCRIPT_NAME']);?>/hello/Nastya">Hello</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="<?=dirname($_SERVER['SCRIPT_NAME']);?>/bye/Oleg">Bye</a>
+          <a class="nav-link" href="<?=dirname($_SERVER['SCRIPT_NAME']);?>/bye/Nastya">Bye</a>
         </li>
       </ul>
     </div>
