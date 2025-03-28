@@ -9,6 +9,7 @@ class Article{
     private $text;
     private $authorId;
     private $createdAt;
+    private $authorNickname;
 
     public function __set($name, $value)
     {
@@ -36,5 +37,9 @@ class Article{
     public function getAuthorId()
     {
         return $this->authorId;
+    }
+    public function getAuthorNickname()
+    {
+        return $this->authorNickname;
     }
 }

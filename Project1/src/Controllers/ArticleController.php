@@ -18,9 +18,11 @@ class ArticleController {
 
     public function index()
     {
-        $sql = 'SELECT * FROM `articles`';
+        // получение nickname автора
+        $sql = 'SELECT articles.*, users.nickname as author_nickname 
+                FROM articles 
+                LEFT JOIN users ON articles.author_id = users.id';
         $articles = $this->db->query($sql, [], Article::class);
-        // var_dump($articles);
         $this->view->renderHtml('main/main', ['articles'=>$articles]);
     }
 
