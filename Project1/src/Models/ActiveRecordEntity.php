@@ -52,6 +52,9 @@ abstract class ActiveRecordEntity
         return $db->query($sql, [], static::class);
     }
 
+    /**
+     * @return static|null
+     */
     public static function getById(int $id)
     {
         $db = Db::getInstance();
@@ -73,19 +76,19 @@ abstract class ActiveRecordEntity
     private function update(array $mappedProperties): void
     {
         $columns2params = [];
-        $params2values = [':id' => $this->id];
-        
+        $params2values = [];
+        $index = 1;
+
         foreach ($mappedProperties as $column => $value) {
-            if ($column === 'id') continue;
-            
-            $param = ':' . $column;
-            $columns2params[] = "`$column` = $param";
+            $param = ':param' . $index;
+            $columns2params[] = $column . ' = ' . $param;
             $params2values[$param] = $value;
+            $index++;
         }
 
-        $sql = 'UPDATE `' . static::getTableName() . '` SET ' . implode(', ', $columns2params) . ' WHERE `id` = :id';
+        $sql = 'UPDATE `' . static::getTableName() . '` SET ' . implode(', ', $columns2params) . ' WHERE id = ' . $this->id;
         $db = Db::getInstance();
-        $db->query($sql, $params2values);
+        $db->query($sql, $params2values, static::class);
     }
 
     private function insert(array $mappedProperties): void

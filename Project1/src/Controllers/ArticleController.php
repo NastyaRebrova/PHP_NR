@@ -52,7 +52,7 @@ class ArticleController
             $article = new Article();
             $article->setName($_POST['name']);
             $article->setText($_POST['text']);
-            $article->setAuthor(User::getById(2)); // временно фиксированный автор
+            $article->setAuthor(User::getById(2));
             $article->save();
 
             header('Location: ' . dirname($_SERVER['SCRIPT_NAME']) . '/article/' . $article->getId());
@@ -79,26 +79,20 @@ class ArticleController
     public function update(int $id)
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: ' . 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . '/article/' . $id . '/edit');
+            header('Location: ' . dirname($_SERVER['SCRIPT_NAME']) . '/article/' . $id . '/edit');
             exit();
         }
 
         try {
             $article = Article::getById($id);
-            
-            if ($article === null) {
-                $this->view->renderHtml('main/error', [], 404);
-                return;
-            }
-
             $article->setName($_POST['name']);
             $article->setText($_POST['text']);
             $article->save();
 
-            header('Location: ' . 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . '/article/' . $id);
+            header('Location: ' . dirname($_SERVER['SCRIPT_NAME']) . '/article/' . $id);
             exit();
         } catch (\Exception $e) {
-            $article = Article::getById($id) ?? new Article();
+            $article = new Article();
             $article->setName($_POST['name']);
             $article->setText($_POST['text']);
             $article->id = $id;
@@ -124,4 +118,5 @@ class ArticleController
         exit();
     }
 }
+
     

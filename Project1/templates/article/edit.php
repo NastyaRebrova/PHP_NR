@@ -10,17 +10,20 @@ require dirname(__DIR__) . '/header.php';
         <div class="alert alert-danger"><?= $error ?></div>
     <?php endif; ?>
 
-    <form action="/<?= trim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/article/<?= $article->getId() ?>/update" method="POST">
+    <form action="<?= dirname($_SERVER['SCRIPT_NAME']) ?>/article/<?= $article->getId() ?>/update" method="POST">
         <div class="mb-3">
             <label for="name" class="form-label">Article title</label>
-            <input type="text" class="form-control" id="name" name="name" value="<?= htmlspecialchars($article->getName()) ?>">
+            <input type="text" class="form-control" id="name" name="name" 
+                   value="<?= htmlspecialchars($article->getName()) ?>">
         </div>
         <div class="mb-3">
             <label for="text" class="form-label">Text</label>
-            <textarea class="form-control" id="text" name="text" rows="5" required><?= htmlspecialchars($article->getText()) ?></textarea>
+            <textarea class="form-control" id="text" name="text" rows="5"><?= 
+                htmlspecialchars($article->getText()) 
+            ?></textarea>
         </div>
         <button type="submit" class="btn btn-primary">Update</button>
-        <a href="/<?= trim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/article/<?= $article->getId() ?>" class="btn btn-secondary">Cancel</a>
+        <a href="<?= dirname($_SERVER['SCRIPT_NAME']) ?>/article/<?= $article->getId() ?>" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
 
