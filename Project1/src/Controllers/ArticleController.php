@@ -3,88 +3,125 @@
 namespace src\Controllers;
 
 use src\View\View;
-use src\Services\Db;
 use src\Models\Articles\Article;
 use src\Models\Users\User;
 
-class ArticleController {
+class ArticleController
+{
     private $view;
-    private $db;
+
     public function __construct()
     {
-        $this->view = new View(dirname(dirname(__DIR__)).'/templates');
-        $this->db = new Db();
+        $this->view = new View(dirname(dirname(__DIR__)) . '/templates');
     }
 
     public function index()
     {
-        // получение nickname автора
-        $sql = 'SELECT articles.*, users.nickname as author_nickname 
-                FROM articles 
-                LEFT JOIN users ON articles.author_id = users.id';
-        $articles = $this->db->query($sql, [], Article::class);
-        $this->view->renderHtml('main/main', ['articles'=>$articles]);
+        $articles = Article::findAll();
+        $this->view->renderHtml('main/main', ['articles' => $articles]);
     }
 
-    public function show(int $id){
-        // получение статьи
-        $sql = "SELECT * FROM `articles` WHERE `id`=:id";
-        $article = $this->db->query($sql, [':id'=>$id], Article::class);
-
-        if ($article == null){
+    public function show(int $id)
+    {
+        $article = Article::getById($id);
+        
+        if ($article === null) {
             $this->view->renderHtml('main/error', [], 404);
             return;
         }
 
-        // получение автора из таблицы users
-        $authorSql = "SELECT * FROM `users` WHERE `id` = :author_id";
-        $author = $this->db->query($authorSql, ['author_id' => $article[0]->getAuthorId()], User::class);
-        
-        $this->view->renderHtml('article/show', ['article' => $article[0],'author' => $author[0]
+        $this->view->renderHtml('article/show', [
+            'article' => $article,
+            'author' => $article->getAuthor()
         ]);
     }
 
-    public function edit(int $id)
+    public function create()
     {
-        // получение статьи для редактирования
-        $sql = "SELECT * FROM `articles` WHERE `id`=:id";
-        $article = $this->db->query($sql, [':id' => $id], Article::class);
-
-        if ($article === null || empty($article)) {
-            $this->view->renderHtml('main/error', [], 404);
-            return;
-        }
-
-        $this->view->renderHtml('article/edit', ['article' => $article[0]]);
+        $this->view->renderHtml('article/create');
     }
 
-    public function update(int $id)
+    public function store()
     {
-        // проверка, что запрос POST
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: ' . dirname($_SERVER['SCRIPT_NAME']) . '/article/'. $id . '/edit');
+            header('Location: ' . dirname($_SERVER['SCRIPT_NAME']) . '/article/create');
             exit();
         }
 
         try {
-            $sql = "UPDATE `articles` SET `name`=:name, `text`=:text WHERE `id`=:id";
-            $this->db->query($sql, [
-                ':name' => $_POST['name'],
-                ':text' => $_POST['text'],
-                ':id' => $id
-            ]);
+            $article = new Article();
+            $article->setName($_POST['name']);
+            $article->setText($_POST['text']);
+            $article->setAuthor(User::getById(2)); // временно фиксированный автор
+            $article->save();
 
-            // перенаправление на страницу статьи
-            header('Location: ' . dirname($_SERVER['SCRIPT_NAME']) . '/article/'. $id);
+            header('Location: ' . dirname($_SERVER['SCRIPT_NAME']) . '/article/' . $article->getId());
             exit();
         } catch (\Exception $e) {
-            $article = new Article($_POST['name'], $_POST['text']);
+            $this->view->renderHtml('article/create', [
+                'error' => 'Ошибка при создании статьи: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function edit(int $id)
+    {
+        $article = Article::getById($id);
+        
+        if ($article === null) {
+            $this->view->renderHtml('main/error', [], 404);
+            return;
+        }
+
+        $this->view->renderHtml('article/edit', ['article' => $article]);
+    }
+
+    public function update(int $id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . '/article/' . $id . '/edit');
+            exit();
+        }
+
+        try {
+            $article = Article::getById($id);
+            
+            if ($article === null) {
+                $this->view->renderHtml('main/error', [], 404);
+                return;
+            }
+
+            $article->setName($_POST['name']);
+            $article->setText($_POST['text']);
+            $article->save();
+
+            header('Location: ' . 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . '/article/' . $id);
+            exit();
+        } catch (\Exception $e) {
+            $article = Article::getById($id) ?? new Article();
+            $article->setName($_POST['name']);
+            $article->setText($_POST['text']);
             $article->id = $id;
 
             $this->view->renderHtml('article/edit', [
                 'article' => $article,
-                'error' => 'Ошибка при обновлении статьи: '. $e->getMessage()
+                'error' => 'Ошибка при обновлении статьи: ' . $e->getMessage()
             ]);
         }
     }
+
+    public function delete(int $id)
+    {
+        $article = Article::getById($id);
+        
+        if ($article === null) {
+            $this->view->renderHtml('main/error', [], 404);
+            return;
+        }
+
+        $article->delete();
+        header('Location: ' . dirname($_SERVER['SCRIPT_NAME']));
+        exit();
+    }
 }
+    

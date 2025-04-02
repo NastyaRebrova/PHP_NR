@@ -1,26 +1,46 @@
 <?php
+
 namespace src\Models\Users;
 
-class User {
-    private $id;
-    private $nickname;
-    private $email;
-    private $is_confirmed;
-    private $role;
-    private $password_hash;
-    private $auth_token;
-    private $created_at;
+use src\Models\ActiveRecordEntity;
 
-    public function __set($name, $value) {
-        $camelCaseName = $this->underscoreToCamelCase($name);
-        $this->$camelCaseName = $value;
-    }
+class User extends ActiveRecordEntity
+{
+    protected $nickname;
+    protected $email;
+    protected $isConfirmed;
+    protected $role;
+    protected $passwordHash;
+    protected $authToken;
+    protected $createdAt;
 
-    private function underscoreToCamelCase(string $name): string {
-        return lcfirst(str_replace('_', '', ucwords($name, '_')));
-    }
-
-    public function getNickname() {
+    public function getNickname(): string
+    {
         return $this->nickname;
+    }
+
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+
+    public function getAuthToken(): string
+    {
+        return $this->authToken;
+    }
+
+    public function getPasswordHash(): string
+    {
+        return $this->passwordHash;
+    }
+
+    public function getRole(): string
+    {
+        return $this->role;
+    }
+
+    protected static function getTableName(): string
+    {
+        return 'users';
     }
 }
