@@ -1,14 +1,18 @@
 <?php
+
 $sort_field = $_GET['sort'] ?? 'id';
 $sort_order = $_GET['order'] ?? 'ASC';
 
-$allowed_fields = ['id', 'firstname', 'date'];
-$allowed_orders = ['ASC', 'DESC'];
+$per_page = 10;
+$page = max(1, $_GET['page'] ?? 1);
+$offset = ($page - 1) * $per_page;
 
-if (!in_array($sort_field, $allowed_fields)) $sort_field = 'id';
-if (!in_array($sort_order, $allowed_orders)) $sort_order = 'ASC';
+$count_sql = "SELECT COUNT(*) as total FROM `notes`";
+$count_result = mysqli_query($mysqli, $count_sql);
+$total_rows = mysqli_fetch_assoc($count_result)['total'];
+$total_pages = ceil($total_rows / $per_page);
 
-$sql = "SELECT * FROM `notes` ORDER BY `$sort_field` $sort_order";
+$sql = "SELECT * FROM `notes` ORDER BY `$sort_field` $sort_order LIMIT $offset, $per_page";
 $result = mysqli_query($mysqli, $sql);
 ?>
 
@@ -40,3 +44,15 @@ $result = mysqli_query($mysqli, $sql);
         <?php endwhile; ?>
     </tbody>
 </table>
+
+<?php if ($total_pages > 1): ?>
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center mt-4">
+        <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+            <li class="page-item <?= $i == $page ? 'active' : '' ?>">
+                <a class="page-link" href="?elem=menu&page=<?= $i ?>&sort=<?= $sort_field ?>&order=<?= $sort_order ?>"><?= $i ?></a>
+            </li>
+        <?php endfor; ?>
+    </ul>
+</nav>
+<?php endif; ?>
