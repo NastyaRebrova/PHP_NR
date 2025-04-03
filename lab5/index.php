@@ -1,56 +1,77 @@
-<?php 
-require('header.php');
-
+<?php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// Определение активного элемента
+$active_elem = $_GET['elem'] ?? 'menu';
+if (!in_array($active_elem, ['menu', 'add', 'delete'])) {
+    $active_elem = 'menu';
+}
+
+// Подключение к БД
 $mysqli = mysqli_connect('localhost', 'root', '', 'friends');
-if(mysqli_connect_errno()) {
-    die("Ошибка подключения к БД: " . mysqli_connect_error());
+if (mysqli_connect_errno()) {
+    die("Ошибка подключения: " . mysqli_connect_error());
 }
 
-// Insert
-if(!empty($_POST) && empty($_GET['id'])) {
-    $sql = "INSERT INTO `notes` 
-            (`firstname`, `name`, `lastname`, `date`, `email`, `phone`, `comment`)
-            VALUES (
-                '".htmlspecialchars($_POST['firstname'])."',
-                '".htmlspecialchars($_POST['name'])."',
-                '".htmlspecialchars($_POST['lastname'])."',
-                '".$_POST['date']."',
-                '".$_POST['email']."',
-                '".$_POST['phone']."',
-                '".htmlspecialchars($_POST['comment'])."'
-            )";
+// Обработка форм
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_GET['id'])) {
+        // Обновление записи
+        $sql = "UPDATE `notes` SET 
+                `firstname` = '" . mysqli_real_escape_string($mysqli, $_POST['firstname']) . "',
+                `name` = '" . mysqli_real_escape_string($mysqli, $_POST['name']) . "',
+                `lastname` = '" . mysqli_real_escape_string($mysqli, $_POST['lastname']) . "',
+                `date` = '" . $_POST['date'] . "',
+                `email` = '" . $_POST['email'] . "',
+                `phone` = '" . $_POST['phone'] . "',
+                `comment` = '" . mysqli_real_escape_string($mysqli, $_POST['comment']) . "'
+                WHERE `id` = " . (int)$_GET['id'];
+    } else {
+        // Добавление записи
+        $sql = "INSERT INTO `notes` 
+                (`firstname`, `name`, `lastname`, `date`, `email`, `phone`, `comment`)
+                VALUES (
+                    '" . mysqli_real_escape_string($mysqli, $_POST['firstname']) . "',
+                    '" . mysqli_real_escape_string($mysqli, $_POST['name']) . "',
+                    '" . mysqli_real_escape_string($mysqli, $_POST['lastname']) . "',
+                    '" . $_POST['date'] . "',
+                    '" . $_POST['email'] . "',
+                    '" . $_POST['phone'] . "',
+                    '" . mysqli_real_escape_string($mysqli, $_POST['comment']) . "'
+                )";
+    }
+    
     mysqli_query($mysqli, $sql);
-    if(mysqli_errno($mysqli)) echo mysqli_error($mysqli);
+    if (mysqli_errno($mysqli)) {
+        die("Ошибка запроса: " . mysqli_error($mysqli));
+    }
+    header("Location: index.php?elem=menu");
+    exit;
 }
 
-// Update
-if(!empty($_POST) && !empty($_GET['id'])) {
-    $sql = "UPDATE `notes` SET
-            `firstname`='".htmlspecialchars($_POST['firstname'])."',
-            `name`='".htmlspecialchars($_POST['name'])."',
-            `lastname`='".htmlspecialchars($_POST['lastname'])."',
-            `date`='".$_POST['date']."',
-            `email`='".$_POST['email']."',
-            `phone`='".$_POST['phone']."',
-            `comment`='".htmlspecialchars($_POST['comment'])."'
-            WHERE `id`=".$_GET['id'];
+// Удаление записи
+if ($active_elem === 'delete' && isset($_GET['id'])) {
+    $sql = "DELETE FROM `notes` WHERE `id` = " . (int)$_GET['id'];
     mysqli_query($mysqli, $sql);
-    if(mysqli_errno($mysqli)) echo mysqli_error($mysqli);
+    if (mysqli_errno($mysqli)) {
+        die("Ошибка удаления: " . mysqli_error($mysqli));
+    }
+    header("Location: index.php?elem=menu");
+    exit;
 }
 
-// Delete
-if(isset($_GET['id']) && empty($_POST)) {
-    $sql = "DELETE FROM `notes` WHERE `id`=".$_GET['id'];
-    mysqli_query($mysqli, $sql);
-    if(mysqli_errno($mysqli)) echo mysqli_error($mysqli);
-}
+require('header.php');
 
-if(!isset($_GET['elem'])) $_GET['elem'] = 'menu';
-if(in_array($_GET['elem'], ['menu', 'add', 'delete'])) {
-    require($_GET['elem'].'.php');
+switch ($active_elem) {
+    case 'add':
+        require('add.php');
+        break;
+    case 'delete':
+        require('delete.php');
+        break;
+    default:
+        require('menu.php');
 }
 
 mysqli_close($mysqli);
