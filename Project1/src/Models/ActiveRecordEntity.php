@@ -85,15 +85,10 @@ abstract class ActiveRecordEntity
         $sql = 'UPDATE `' . static::getTableName() . '` SET ' . implode(', ', $columnsToUpdate) . ' WHERE `id` = :id';
         $params[':id'] = $this->id;
 
-        // Debug: Вывод SQL и параметров
-        error_log("SQL: " . $sql);
-        error_log("Params: " . print_r($params, true));
 
         $db = Db::getInstance();
         $result = $db->query($sql, $params);
 
-        // Debug: Проверка результата запроса
-        error_log("Update result: " . ($result ? "Success" : "Failed"));
     }
 
     private function insert(): void

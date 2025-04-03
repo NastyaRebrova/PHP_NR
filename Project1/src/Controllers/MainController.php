@@ -13,7 +13,7 @@ class MainController
     public function __construct()
     {
         $this->view = new View(dirname(dirname(__DIR__)). '/templates');
-        $this->db = Db::getInstance(); // Используем getInstance() вместо new Db()
+        $this->db = Db::getInstance(); 
     }
 
     public function sayHello(string $name)

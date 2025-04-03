@@ -11,7 +11,6 @@ class Article extends ActiveRecordEntity
     protected $text;
     protected $authorId;
     protected $createdAt;
-    // protected $authorNickname;
 
     public function getName(): string
     {

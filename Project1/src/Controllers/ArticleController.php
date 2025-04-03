@@ -4,7 +4,6 @@ namespace src\Controllers;
 
 use src\View\View;
 use src\Models\Articles\Article;
-use src\Models\Users\User;
 
 class ArticleController
 {
