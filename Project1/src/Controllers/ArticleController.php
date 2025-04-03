@@ -12,7 +12,7 @@ class ArticleController
 
     public function __construct()
     {
-        $this->view = new View(dirname(dirname(__DIR__)) . '/templates');
+        $this->view = new View(dirname(dirname(__DIR__))."/templates");
     }
 
     public function index()
@@ -24,7 +24,7 @@ class ArticleController
     public function show(int $id)
     {
         $article = Article::getById($id);
-        
+
         if ($article === null) {
             $this->view->renderHtml('main/error', [], 404);
             return;
@@ -36,38 +36,10 @@ class ArticleController
         ]);
     }
 
-    public function create()
-    {
-        $this->view->renderHtml('article/create');
-    }
-
-    public function store()
-    {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: ' . dirname($_SERVER['SCRIPT_NAME']) . '/article/create');
-            exit();
-        }
-
-        try {
-            $article = new Article();
-            $article->setName($_POST['name']);
-            $article->setText($_POST['text']);
-            $article->setAuthor(User::getById(2));
-            $article->save();
-
-            header('Location: ' . dirname($_SERVER['SCRIPT_NAME']) . '/article/' . $article->getId());
-            exit();
-        } catch (\Exception $e) {
-            $this->view->renderHtml('article/create', [
-                'error' => 'Ошибка при создании статьи: ' . $e->getMessage()
-            ]);
-        }
-    }
-
     public function edit(int $id)
     {
         $article = Article::getById($id);
-        
+
         if ($article === null) {
             $this->view->renderHtml('main/error', [], 404);
             return;
@@ -76,30 +48,46 @@ class ArticleController
         $this->view->renderHtml('article/edit', ['article' => $article]);
     }
 
-    public function update(int $id)
+    public function update(int $id) {
+        $article = Article::getById($id);
+        if (!$article) {
+            $this->view->renderHtml('main/error', [], 404);
+            return;
+        }
+    
+        $article->setName($_POST['name']);
+        $article->setText($_POST['text']);
+        $article->save();
+        
+        header('Location: /PHP_NR/Project1/www/article/' . $id);
+        exit();
+    }
+
+    public function create()
+    {
+        $this->view->renderHtml('article/create');
+    }
+
+    public function store()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: ' . dirname($_SERVER['SCRIPT_NAME']) . '/article/' . $id . '/edit');
+            header('Location: '. dirname($_SERVER['SCRIPT_NAME']) . '/article/create');
             exit();
         }
 
         try {
-            $article = Article::getById($id);
-            $article->setName($_POST['name']);
-            $article->setText($_POST['text']);
-            $article->save();
-
-            header('Location: ' . dirname($_SERVER['SCRIPT_NAME']) . '/article/' . $id);
-            exit();
-        } catch (\Exception $e) {
             $article = new Article();
             $article->setName($_POST['name']);
             $article->setText($_POST['text']);
-            $article->id = $id;
+            $article->setAuthorId(2);
+            $article->save();
 
-            $this->view->renderHtml('article/edit', [
-                'article' => $article,
-                'error' => 'Ошибка при обновлении статьи: ' . $e->getMessage()
+            $articleId = $article->getId();
+            header('Location: '. dirname($_SERVER['SCRIPT_NAME']) . '/article/'. $articleId);
+            exit();
+        } catch (\Exception $e) {
+            $this->view->renderHtml('article/create', [
+                'error' => 'Ошибка при создании статьи: '. $e->getMessage()
             ]);
         }
     }
@@ -114,7 +102,7 @@ class ArticleController
         }
 
         $article->delete();
-        header('Location: ' . dirname($_SERVER['SCRIPT_NAME']));
+        header('Location: /'. trim(dirname($_SERVER['SCRIPT_NAME']), '/'));
         exit();
     }
 }

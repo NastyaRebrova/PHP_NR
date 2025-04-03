@@ -9,18 +9,18 @@ abstract class ActiveRecordEntity
 {
     protected $id;
 
-    public function getId(): int
+    public function getId()
     {
         return $this->id;
     }
 
-    public function __set(string $name, $value): void
+    public function __set($name, $value)
     {
-        $camelCaseName = $this->underscoreToCamelcase($name);
+        $camelCaseName = $this->underscoreToCamelCase($name);
         $this->$camelCaseName = $value;
     }
 
-    private function underscoreToCamelcase(string $name): string
+    private function underscoreToCamelCase(string $name): string
     {
         return lcfirst(str_replace('_', '', ucwords($name, '_')));
     }
@@ -30,18 +30,18 @@ abstract class ActiveRecordEntity
         return strtolower(preg_replace('/([A-Z])/', '_$1', $source));
     }
 
-    private function mapPropertiesToDbFormat(): array
-    {
-        $reflector = new ReflectionObject($this);
-        $properties = $reflector->getProperties();
+    private function mapPropertiesToDb(): array {
+        $excludedProperties = ['authorNickname'];
         $mappedProperties = [];
-
-        foreach ($properties as $property) {
-            $propertyName = $property->getName();
-            $propertyDbName = $this->camelCaseToUnderscore($propertyName);
-            $mappedProperties[$propertyDbName] = $this->$propertyName;
+        
+        foreach ($this as $propertyName => $value) {
+            if (in_array($propertyName, $excludedProperties)) {
+                continue;
+            }
+            $dbName = $this->camelCaseToUnderscore($propertyName);
+            $mappedProperties[$dbName] = $value;
         }
-
+        
         return $mappedProperties;
     }
 
@@ -52,9 +52,6 @@ abstract class ActiveRecordEntity
         return $db->query($sql, [], static::class);
     }
 
-    /**
-     * @return static|null
-     */
     public static function getById(int $id)
     {
         $db = Db::getInstance();
@@ -63,61 +60,70 @@ abstract class ActiveRecordEntity
         return $result ? $result[0] : null;
     }
 
-    public function save(): void
+    public function save(): void 
     {
-        $mappedProperties = $this->mapPropertiesToDbFormat();
-        if ($this->id !== null) {
-            $this->update($mappedProperties);
+        if ($this->getId()) {
+            $this->update();
         } else {
-            $this->insert($mappedProperties);
+            $this->insert();
         }
     }
-
-    private function update(array $mappedProperties): void
+    
+    private function update(): void
     {
-        $columns2params = [];
-        $params2values = [];
-        $index = 1;
+        $mappedProperties = $this->mapPropertiesToDb();
+        $columnsToUpdate = [];
+        $params = [];
 
-        foreach ($mappedProperties as $column => $value) {
-            $param = ':param' . $index;
-            $columns2params[] = $column . ' = ' . $param;
-            $params2values[$param] = $value;
-            $index++;
+        foreach ($mappedProperties as $columnName => $value) {
+            if ($columnName === 'id') continue;
+            $param = ':' . $columnName;
+            $columnsToUpdate[] = "`$columnName` = $param";
+            $params[$param] = $value;
         }
 
-        $sql = 'UPDATE `' . static::getTableName() . '` SET ' . implode(', ', $columns2params) . ' WHERE id = ' . $this->id;
+        $sql = 'UPDATE `' . static::getTableName() . '` SET ' . implode(', ', $columnsToUpdate) . ' WHERE `id` = :id';
+        $params[':id'] = $this->id;
+
+        // Debug: Вывод SQL и параметров
+        error_log("SQL: " . $sql);
+        error_log("Params: " . print_r($params, true));
+
         $db = Db::getInstance();
-        $db->query($sql, $params2values, static::class);
+        $result = $db->query($sql, $params);
+
+        // Debug: Проверка результата запроса
+        error_log("Update result: " . ($result ? "Success" : "Failed"));
     }
 
-    private function insert(array $mappedProperties): void
+    private function insert(): void
     {
+        $mappedProperties = $this->mapPropertiesToDb();
         $filteredProperties = array_filter($mappedProperties);
 
         $columns = [];
         $paramsNames = [];
-        $params2values = [];
+        $params = [];
 
         foreach ($filteredProperties as $columnName => $value) {
-            $columns[] = '`' . $columnName . '`';
+            $columns[] = "`$columnName`";
             $paramName = ':' . $columnName;
             $paramsNames[] = $paramName;
-            $params2values[$paramName] = $value;
+            $params[$paramName] = $value;
         }
 
         $sql = 'INSERT INTO `' . static::getTableName() . '` (' . implode(', ', $columns) . ') VALUES (' . implode(', ', $paramsNames) . ')';
         $db = Db::getInstance();
-        $db->query($sql, $params2values, static::class);
+        $db->query($sql, $params);
+
         $this->id = $db->getLastInsertId();
     }
 
     public function delete(): void
     {
         $db = Db::getInstance();
-        $sql = 'DELETE FROM `' . static::getTableName() . '` WHERE id = :id';
-        $db->query($sql, [':id' => $this->id], static::class);
-        $this->id = null;
+        $sql = 'DELETE FROM `' . static::getTableName() . '` WHERE `id` = :id';
+        $db->query($sql, [':id' => $this->id]);
     }
 
     abstract protected static function getTableName(): string;

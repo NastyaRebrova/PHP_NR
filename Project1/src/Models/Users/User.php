@@ -19,26 +19,6 @@ class User extends ActiveRecordEntity
         return $this->nickname;
     }
 
-    public function getEmail(): string
-    {
-        return $this->email;
-    }
-
-    public function getAuthToken(): string
-    {
-        return $this->authToken;
-    }
-
-    public function getPasswordHash(): string
-    {
-        return $this->passwordHash;
-    }
-
-    public function getRole(): string
-    {
-        return $this->role;
-    }
-
     protected static function getTableName(): string
     {
         return 'users';

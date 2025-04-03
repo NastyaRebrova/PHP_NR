@@ -11,7 +11,7 @@ class Article extends ActiveRecordEntity
     protected $text;
     protected $authorId;
     protected $createdAt;
-    protected $authorNickname;
+    // protected $authorNickname;
 
     public function getName(): string
     {
@@ -35,12 +35,7 @@ class Article extends ActiveRecordEntity
 
     public function getAuthorNickname(): string
     {
-        return $this->authorNickname ?? $this->getAuthor()->getNickname();
-    }
-
-    public function getCreatedAt(): string
-    {
-        return $this->createdAt;
+        return $this->getAuthor()->getNickname();
     }
 
     public function setName(string $name): void
@@ -53,9 +48,9 @@ class Article extends ActiveRecordEntity
         $this->text = $text;
     }
 
-    public function setAuthor(User $author): void
+    public function setAuthorId(int $authorId): void
     {
-        $this->authorId = $author->getId();
+        $this->authorId = $authorId;
     }
 
     protected static function getTableName(): string

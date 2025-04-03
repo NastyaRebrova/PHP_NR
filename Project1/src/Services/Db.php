@@ -4,14 +4,14 @@ namespace src\Services;
 
 class Db
 {
-    private static $instance;
     private $pdo;
+    private static $instance;
 
     private function __construct()
     {
         $dbOptions = require('settings.php');
         $this->pdo = new \PDO(
-            'mysql:host=' . $dbOptions['host'] . ';dbname=' . $dbOptions['dbname'],
+            'mysql:host='.$dbOptions['host'].';dbname='.$dbOptions['dbname'],
             $dbOptions['user'],
             $dbOptions['password']
         );
@@ -23,6 +23,7 @@ class Db
         if (self::$instance === null) {
             self::$instance = new self();
         }
+
         return self::$instance;
     }
 
@@ -31,7 +32,10 @@ class Db
         $sth = $this->pdo->prepare($sql);
         $result = $sth->execute($params);
 
+        // Debug: Вывод ошибок PDO, если запрос не удался
         if ($result === false) {
+            $errorInfo = $sth->errorInfo();
+            error_log("SQL Error: " . print_r($errorInfo, true));
             return null;
         }
 
