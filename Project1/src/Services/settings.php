@@ -1,4 +1,5 @@
 <?php
+// подключение к бд
 
     return [
         'host' => 'localhost',

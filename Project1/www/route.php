@@ -1,4 +1,5 @@
 <?php
+// маршрутизация
 
     return [
         "~/article/(\d+)$~" => [src\Controllers\ArticleController::class, 'show'],
@@ -16,6 +17,56 @@
         "~/article/(\d+)/comment/store$~" => [src\Controllers\CommentController::class, 'store']
     ];
 
+    
+
+    
+
+
+    
+
+    
+
+
+        
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+    
+
+
+    
+
+    
+
+
+        
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
     
 
     

@@ -13,6 +13,8 @@ class Comment extends ActiveRecordEntity
     protected $articleId;
     protected $createdAt;
 
+    // методы для чтения данных:
+
     public function getText(): string
     {
         return $this->text;
@@ -28,10 +30,13 @@ class Comment extends ActiveRecordEntity
         return $this->articleId;
     }
 
+    // Возвращает объект автора (User) через User::getById()
     public function getAuthor(): User
     {
         return User::getById($this->authorId);
     }
+
+    // методы для изменения данных:
 
     public function setText(string $text): void
     {
@@ -48,15 +53,18 @@ class Comment extends ActiveRecordEntity
         $this->articleId = $articleId;
     }
 
+    // возвращает имя таблицы в БД (comments), с которой работает модель
     protected static function getTableName(): string
     {
         return 'comments';
     }
 
+    // Возвращает все комментарии к статье, отсортированные по дате (новые сверху)
     public static function getByArticleId(int $articleId): array
     {
         $db = Db::getInstance();
         $sql = 'SELECT * FROM ' . static::getTableName() . ' WHERE article_id = :article_id ORDER BY created_at DESC';
+        // выполняет запрос и возвращает массив объектов Comment
         return $db->query($sql, [':article_id' => $articleId], static::class);
     }
 }

@@ -1,57 +1,73 @@
 <?php
+// реализует паттерн Active Record для работы с базой данных
 
 namespace src\Models;
 
 use src\Services\Db;
 use ReflectionObject;
 
+// abstract - класс нельзя инстанцировать напрямую, только через наследование
 abstract class ActiveRecordEntity
 {
     protected $id;
 
+    // Возвращает значение ID текущей сущности
     public function getId()
     {
         return $this->id;
     }
 
+    // автоматически преобразует имена полей БД (snake_case) в camelCase свойства (Пример: поле created_at - свойство createdAt)
     public function __set($name, $value)
     {
         $camelCaseName = $this->underscoreToCamelCase($name);
         $this->$camelCaseName = $value;
     }
 
+    // Пр: author_id - authorId
     private function underscoreToCamelCase(string $name): string
     {
         return lcfirst(str_replace('_', '', ucwords($name, '_')));
     }
 
+    // Пр: authorId - author_id
     private function camelCaseToUnderscore(string $source): string
     {
         return strtolower(preg_replace('/([A-Z])/', '_$1', $source));
     }
 
-    private function mapPropertiesToDb(): array {
-        $excludedProperties = ['authorNickname'];
-        $mappedProperties = [];
-        
-        foreach ($this as $propertyName => $value) {
-            if (in_array($propertyName, $excludedProperties)) {
-                continue;
+    // преобразует свойства объекта в формат для БД
+    private function mapPropertiesToDb(): array
+        {
+            // Создаем объект ReflectionObject для текущего экземпляра ($this)
+            $reflector = new ReflectionObject($this);
+            // Получаем массив всех свойств объекта
+            $properties = $reflector->getProperties();
+            // Инициализируем пустой массив для результата преобразования
+            $mappedProperties = [];
+            foreach($properties as $property){
+                // Получаем имя текущего свойства
+                $propertyName = $property->getName();
+                // Преобразуем имя свойства из camelCase в snake_case
+                $propertyDbName = $this->camelCaseToUnderscore($propertyName);
+                // Добавляем в результирующий массив пару: ключ - имя поля в БД (snake_case), значение - значение свойства объекта
+                $mappedProperties[$propertyDbName]= $this->$propertyName;
             }
-            $dbName = $this->camelCaseToUnderscore($propertyName);
-            $mappedProperties[$dbName] = $value;
+            // Возвращаем массив для использования в SQL-запросах
+            return $mappedProperties;
         }
-        
-        return $mappedProperties;
-    }
 
+    // Возвращает все записи из таблицы
     public static function findAll(): ?array
     {
         $db = Db::getInstance();
+        // вызов абстрактного метода дочернего класса
         $sql = 'SELECT * FROM `' . static::getTableName() . '`';
+        // возвращает имя класса, для которого вызывается метод
         return $db->query($sql, [], static::class);
     }
 
+    // Находит одну запись по ID
     public static function getById(int $id)
     {
         $db = Db::getInstance();
@@ -60,6 +76,7 @@ abstract class ActiveRecordEntity
         return $result ? $result[0] : null;
     }
 
+    // Определяет, нужно ли обновлять существующую запись или создавать новую (смотря на наличие ID)
     public function save(): void 
     {
         if ($this->getId()) {
@@ -69,6 +86,7 @@ abstract class ActiveRecordEntity
         }
     }
     
+    // Формирует динамический UPDATE-запрос
     private function update(): void
     {
         $mappedProperties = $this->mapPropertiesToDb();
@@ -91,6 +109,7 @@ abstract class ActiveRecordEntity
 
     }
 
+    // Создаёт новую запись в БД (после вставки обновляет ID объекта)
     private function insert(): void
     {
         $mappedProperties = $this->mapPropertiesToDb();
@@ -113,7 +132,7 @@ abstract class ActiveRecordEntity
 
         $this->id = $db->getLastInsertId();
     }
-
+    // Удаляет текущую запись из БД по ID
     public function delete(): void
     {
         $db = Db::getInstance();
@@ -121,5 +140,6 @@ abstract class ActiveRecordEntity
         $db->query($sql, [':id' => $this->id]);
     }
 
+    // Возвращает имя таблицы БД, связанной с сущностью
     abstract protected static function getTableName(): string;
 }

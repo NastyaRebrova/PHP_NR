@@ -1,4 +1,5 @@
 <?php
+// контроллер, который обрабатывает базовые страницы приложения (приветствие, прощание)
 
 namespace src\Controllers;
 
@@ -8,11 +9,13 @@ use src\Services\Db;
 class MainController
 {
     private $view;
+    // Хранит подключение к базе данных через Db::getInstance() (реализация паттерна Singleton)
     private $db;
 
     public function __construct()
     {
         $this->view = new View(dirname(dirname(__DIR__)). '/templates');
+        // Получает экземпляр подключения к базе данных (если БД потребуется в будущем)
         $this->db = Db::getInstance(); 
     }
 

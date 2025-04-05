@@ -1,16 +1,21 @@
 <?php
+// модель для работы со статьями, которая наследует базовый функционал от ActiveRecordEntity
 
 namespace src\Models\Articles;
 
 use src\Models\ActiveRecordEntity;
 use src\Models\Users\User;
 
+// Наследует методы для работы с БД (save(), delete(), findAll() и др.)
 class Article extends ActiveRecordEntity
 {
+    // protected - свойства доступны из текущего класса, а также из классов-наследников
     protected $name;
     protected $text;
     protected $authorId;
     protected $createdAt;
+
+    // методы для чтения данных:
 
     public function getName(): string
     {
@@ -32,10 +37,7 @@ class Article extends ActiveRecordEntity
         return User::getById($this->authorId);
     }
 
-    public function getAuthorNickname(): string
-    {
-        return $this->getAuthor()->getNickname();
-    }
+    // методы для изменения данных:
 
     public function setName(string $name): void
     {
@@ -52,6 +54,7 @@ class Article extends ActiveRecordEntity
         $this->authorId = $authorId;
     }
 
+    // Возвращает имя таблицы в БД, с которой работает модель (родительский класс ActiveRecordEntity использует это имя для SQL-запросов)
     protected static function getTableName(): string
     {
         return 'articles';

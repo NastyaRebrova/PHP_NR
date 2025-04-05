@@ -1,6 +1,5 @@
 <?php
     require dirname(__DIR__).'../header.php';
-    // echo "<h1>Главная старница</h1>";
 ?>
   <table class="table">
     <thead>
@@ -17,7 +16,7 @@
         <th scope="row"><?=$article->getId();?></th>
         <td><a href="<?=dirname($_SERVER['SCRIPT_NAME']).'/article/'.$article->getId();?>"><?=$article->getName();?></a></td>
         <td><?=$article->getText();?></td>
-        <td><?=$article->getAuthorNickname();?></td>
+        <td><?=$article->getAuthor()->getNickname();?></td>
       </tr>
       <?php endforeach;?>
     </tbody>
